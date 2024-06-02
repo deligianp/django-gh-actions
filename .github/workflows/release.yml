@@ -32,7 +32,7 @@ jobs:
       - name: Test step
         run: |
           COMMIT_MESSAGE = "${{ github.event.head_commit.message }}"
-          COMMIT_MESSAGE_ABBR = ${COMMIT_MESSAGE:0:40}
+          COMMIT_MESSAGE_ABBR = "${COMMIT_MESSAGE:0:40}"
           NEW_COMMIT_MESSAGE = "Updated migrations for '$COMMIT_MESSAGE_ABBR'"
           echo $NEW_COMMIT_MESSAGE
 #      - name: Updating migrations
