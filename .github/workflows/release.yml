@@ -1,0 +1,31 @@
+name: release
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+jobs:
+  makemigrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checking out repository
+        with:
+          ref: release
+      - uses: actions/setup-python@v5
+        name: Setting up Python 3.12
+        with:
+          python-version: 3.12
+      - name: Fetch and rebase branch main onto releases
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git rebase origin/main
+      - name: Install Django dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Making migrations
+        run: |
+          python manage.py makemigrations --noinput
