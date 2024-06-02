@@ -31,9 +31,11 @@ jobs:
           python manage.py makemigrations --noinput
       - name: Test step
         run: echo "Update migrations for commit '$(echo "${{ github.event.head_commit.message }}" | cut -c1-32 )'"
-#      - name: Updating migrations
-#        run: |
-#          git config --global user.name 'github-actions[bot]'
-#          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-#          git commit -m "Updating migrations for ''"
-#          git push
+      - name: Updating migrations
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -m "Update migrations for commit '$(echo "${{ github.event.head_commit.message }}" | cut -c1-32 )'
+
+          Update migrations for commit '${{ github.event.head_commit.message }}'"
+          git push
