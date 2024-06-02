@@ -29,3 +29,11 @@ jobs:
       - name: Making migrations
         run: |
           python manage.py makemigrations --noinput
+      - name: Test step
+        run: echo ${{github.event.head_commit.message}}
+#      - name: Updating migrations
+#        run: |
+#          git config --global user.name 'github-actions[bot]'
+#          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#          git commit -m "Updating migrations"
+#          git push
