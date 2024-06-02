@@ -30,10 +30,14 @@ jobs:
         run: |
           python manage.py makemigrations --noinput
       - name: Test step
-        run: echo ${{github.event.head_commit.message}}
+        run: |
+          COMMIT_MESSAGE = "${{ github.event.head_commit.message }}"
+          COMMIT_MESSAGE_ABBR = ${COMMIT_MESSAGE:0:40}
+          NEW_COMMIT_MESSAGE = "Updated migrations for '$COMMIT_MESSAGE_ABBR'"
+          echo $NEW_COMMIT_MESSAGE
 #      - name: Updating migrations
 #        run: |
 #          git config --global user.name 'github-actions[bot]'
 #          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-#          git commit -m "Updating migrations"
+#          git commit -m "Updating migrations for ''"
 #          git push
