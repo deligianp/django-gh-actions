@@ -37,11 +37,12 @@ jobs:
           git add -f */migrations/*.py
       - name: Conditionally commit changes
         run: |
-          git commit -m "Finalizing changes detected on main branch
+          git commit -m "Releasing changes for commit #$(git rev-parse --short "$GITHUB_SHA") from main branch
 
           - Include changes
           - Include potential new migrations"
-      - name: Getting current git log and diff
-        run: |
-          git log --graph -n 2
-          git diff
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release
