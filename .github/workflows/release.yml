@@ -12,8 +12,6 @@ jobs:
         name: Checking out repository
         with:
           ref: release
-          token: secrets.AUTO_MANAGE_REPO_PAT
-          repository: deligianp/django-gh-actions
       - uses: actions/setup-python@v5
         name: Setting up Python 3.12
         with:
@@ -44,3 +42,6 @@ jobs:
           git commit -m "Update migrations for commit '$(echo "${{ github.event.head_commit.message }}" | cut -c1-32 )'
 
           Update migrations for commit '${{ github.event.head_commit.message }}'"
+      - name: Log commits
+        run: |
+          git log --graph
