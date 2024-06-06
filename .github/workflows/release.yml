@@ -12,8 +12,6 @@ jobs:
         name: Checking out repository
         with:
           ref: release
-          token: secrets.AUTO_MANAGE_REPO_PAT
-          repository: deligianp/django-gh-actions
       - uses: actions/setup-python@v5
         name: Setting up Python 3.12
         with:
@@ -23,24 +21,27 @@ jobs:
           git config --global user.name 'deligianp'
           git config --global user.email 'deligianp@users.noreply.github.com'
           git fetch origin main
-          git merge origin/main --no-commit
+          git merge origin/main --no-commit --no-ff
       - name: Install Django dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Adding merged changes to commit
+        run: |
+          git add -A
       - name: Making migrations
         run: |
           python manage.py makemigrations --noinput
       - name: Adding potential migration files to commit
         run: |
-          git add */migrations/*.py
-          if [-z git diff --cached --name-only]
-            then echo "commit=true" >> $GITHUB_ENV
-            else echo "commit=false" >> $GITHUB_ENV
-          fi
+          git add -f */migrations/*.py
       - name: Conditionally commit changes
-        if: env.commit == 'true'
         run: |
-          git commit -m "Update migrations for commit '$(echo "${{ github.event.head_commit.message }}" | cut -c1-32 )'
+          git commit -m "Finalizing changes detected on main branch
 
-          Update migrations for commit '${{ github.event.head_commit.message }}'"
+          - Include changes
+          - Include potential new migrations"
+      - name: Getting current git log and diff
+        run: |
+          git log --graph -n 2
+          git diff
