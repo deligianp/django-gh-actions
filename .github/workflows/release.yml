@@ -21,7 +21,7 @@ jobs:
           git config --global user.name 'deligianp'
           git config --global user.email 'deligianp@users.noreply.github.com'
           git fetch origin main
-          git merge origin/main --no-commit --no-ff
+          git merge origin/main --allow-unrelated-histories --no-commit --no-ff
       - name: Infer commit's tag
         run: |
           TAG=$(git describe --tags --exact-match $(git rev-parse origin/main)) && echo "TAG:$TAG" >> $GITHUB_ENV
