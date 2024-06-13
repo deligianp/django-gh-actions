@@ -27,6 +27,7 @@ jobs:
       - name: Infer commit's tag
         run: |
           TAG=$(git describe --tags --exact-match $(git rev-parse origin/main)) && echo "TAG:$TAG" >> $GITHUB_ENV
+          :
       - name: Install Django dependencies
         run: |
           python -m pip install --upgrade pip
