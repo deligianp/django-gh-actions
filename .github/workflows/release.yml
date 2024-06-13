@@ -12,6 +12,8 @@ jobs:
         name: Checking out repository
         with:
           ref: release
+          fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-python@v5
         name: Setting up Python 3.12
         with:
