@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - "release"
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,10 +12,6 @@ jobs:
         name: Checking out release branch
         with:
           ref: release
-      - name: Infer commit's tag
-        run: |
-          TAG=$(git describe --tags --exact-match HEAD) && echo "TAG:$TAG" >> $GITHUB_ENV
-          :
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
