@@ -1,0 +1,40 @@
+name: build
+on:
+  push:
+    branches:
+      - "release"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checking out release branch
+        with:
+          ref: release
+      - name: Infer commit's tag
+        run: |
+          TAG=$(git describe --tags --exact-match HEAD) && echo "TAG:$TAG" >> $GITHUB_ENV
+          :
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          tags: |
+            type=raw,value={{date 'YYYYMMDD'}}
+            type=ref,event=tag
+          images: |
+            deligianp/uni
+
+      - name: Build and push Docker images
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
