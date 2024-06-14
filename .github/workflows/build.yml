@@ -13,6 +13,7 @@ jobs:
         with:
           ref: release
           fetch-tags: true
+          fetch-depth: 0
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
