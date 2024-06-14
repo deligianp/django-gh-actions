@@ -33,6 +33,9 @@ jobs:
             type=ref,event=tag
           images: |
             deligianp/uni
+      - name: Log inferred image tags
+        run: |
+          echo "${{ steps.meta.outputs.tags }}"
 
       - name: Build and push Docker images
         id: push
