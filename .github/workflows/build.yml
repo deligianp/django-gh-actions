@@ -30,7 +30,6 @@ jobs:
         with:
           tags: |
             type=raw,value={{date 'YYYYMMDD'}}
-            type=ref,event=push
             type=ref,event=tag
           images: |
             deligianp/uni
