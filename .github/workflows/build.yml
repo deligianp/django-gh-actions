@@ -28,7 +28,7 @@ jobs:
         with:
           tags: |
             type=raw,value={{date 'YYYYMMDD'}}
-            type=ref,event=tag
+            type=ref,event=push tag
           images: |
             deligianp/uni
 
