@@ -17,15 +17,26 @@ jobs:
         run: git tag --list
       - name: Ensure tag is in a proper branch
         run: |
-          BRANCH=$(git branch --show-current)
-          echo "Current branch: $BRANCH"
+          TAG_COMMIT_SHA=$(git rev-list -n 1 $GITHUB_REF)
+          echo "Tagged commit SHA: $TAG_COMMIT_SHA"
+
+          TAGGED_BRANCHES=$(git branch --contains $TAG_COMMIT_SHA --no-color --format='%(refname:short)')
+          echo "Branches tagged with the triggering tag: $TAGGED_BRANCHES"
           ACCEPTABLE_BRANCHES=(main release)
+          BRANCH_MATCH=false
           for b in ${ACCEPTABLE_BRANCHES[@]}; do
-            echo "Evaluating branch $b"
-            if [[ $b == $BRANCH ]]; then
-              echo "Tags in current branch $BRANCH are accepted for building Docker image"
-              echo "CHECKS_PASS=true" >> $GITHUB_ENV
+            if [[ $BRANCH_MATCH == true ]]; then
+              break;
             fi
+            echo "Evaluating whether tag is in branch '$b'"
+            for t in {TAGGED_BRANCHES[@]}; do
+              if [[ $b == $t ]]; then
+                BRANCH_MATCH=true
+                echo "Triggering tag in branch $t is accepted for being used in a Docker image"
+                echo "CHECKS_PASS=true" >> $GITHUB_ENV
+                break
+              fi
+            done
           done
       - name: Extract metadata (tags, labels) for Docker
         if: env.CHECKS_PASS == 'true'
