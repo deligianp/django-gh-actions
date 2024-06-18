@@ -17,8 +17,8 @@ jobs:
         run: git tag --list
       - name: Ensure tag is in a proper branch
         run: |
-          BRANCH=git rev-parse --abbrev-ref HEAD
-          ACCEPTABLE_BRANCHES="main release"
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          ACCEPTABLE_BRANCHES=(main release)
           for b in ${ACCEPTABLE_BRANCHES[@]}; do
             if [[ $b == $BRANCH ]]; then
               echo "CHECKS_PASS=true" >> $GITHUB_ENV
