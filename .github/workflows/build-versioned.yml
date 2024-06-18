@@ -43,8 +43,6 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          flavor: |
-            latest=false
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=semver,pattern={{version}}
