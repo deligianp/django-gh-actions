@@ -29,8 +29,8 @@ jobs:
               break;
             fi
             echo "Evaluating whether tag is in branch '$b'"
-            for t in {TAGGED_BRANCHES[@]}; do
-              if [[ $b == *$t ]]; then
+            for t in ${TAGGED_BRANCHES[@]}; do
+              if [[ $t == *"$b" ]]; then
                 BRANCH_MATCH=true
                 echo "Triggering tag in branch $b is accepted for being used in a Docker image"
                 echo "CHECKS_PASS=true" >> $GITHUB_ENV
