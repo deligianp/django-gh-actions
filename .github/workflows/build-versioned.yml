@@ -17,13 +17,13 @@ jobs:
         run: git tag --list
       - name: Ensure tag is in a proper branch
         run: |
-          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          BRANCH=$(git branch --show-current)
           echo "Current branch: $BRANCH"
           ACCEPTABLE_BRANCHES=(main release)
           for b in ${ACCEPTABLE_BRANCHES[@]}; do
             echo "Evaluating branch $b"
             if [[ $b == $BRANCH ]]; then
-              echo "Tags in current branch are accepted f 
+              echo "Tags in current branch $BRANCH are accepted for building Docker image"
               echo "CHECKS_PASS=true" >> $GITHUB_ENV
             fi
           done
