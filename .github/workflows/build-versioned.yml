@@ -32,36 +32,44 @@ jobs:
             for t in ${TAGGED_BRANCHES[@]}; do
               if [[ $t == *"$b" ]]; then
                 BRANCH_MATCH=true
-                echo "Triggering tag in branch $b is accepted for being used in a Docker image"
-                echo "CHECKS_PASS=true" >> $GITHUB_ENV
+                echo "Triggering tag in branch `$b` is accepted for being used in a Docker image"
+                echo "QUALIFIED_BRANCH=$b" >> $GITHUB_ENV
                 break
               fi
             done
           done
+      - name: Infer tags
+        if: env.QUALIFIED_BRANCH != ''
+        run: |
+          TAGS="type=semver,pattern={{version}}"
+          if [[ ${{ env.QUALIFIED_BRANCH }} == main ]]; then
+            TAGS="$TAGS\nlatest"
+          fi
+          echo "Inferred tags: 
+          $TAGS"
+          echo "TAGS=$TAGS" >> $GITHUB_ENV
       - name: Extract metadata (tags, labels) for Docker
-        if: env.CHECKS_PASS == 'true'
+        if: env.QUALIFIED_BRANCH != ''
         id: meta
         uses: docker/metadata-action@v5
         with:
           flavor: |
             latest=false
-          tags: |
-            type=semver,pattern={{version}}
-            type=raw,value=latest,enable={{is_default_branch}}
+          tags: ${{ env.TAGS }}
           images: |
             deligianp/uni
       - name: Log inferred image tags
-        if: env.CHECKS_PASS == 'true'
+        if: env.QUALIFIED_BRANCH != ''
         run: |
           echo "${{ steps.meta.outputs.tags }}"
       - name: Log in to Docker Hub
-        if: env.CHECKS_PASS == 'true'
+        if: env.QUALIFIED_BRANCH != ''
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push Docker images
-        if: env.CHECKS_PASS == 'true'
+        if: env.QUALIFIED_BRANCH != ''
         id: push
         uses: docker/build-push-action@v5
         with:
