@@ -4,38 +4,45 @@ on:
   push:
     branches:
       - main
-      - migrations
-
+      - release
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        with:
+          ref: ${{ github.ref }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Get current date
         id: date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      - name: Build and push Docker images for main
+      - name: Extract metadata for main branch
         if: github.ref == 'refs/heads/main'
-        run: |
-          docker build -t deligianp/uni:${{ env.DATE }} .
-          docker build -t deligianp/uni:edge .
-          docker push deligianp/uni:${{ env.DATE }}
-          docker push deligianp/uni:edge
-
-      - name: Build and push Docker image for migrations
-        if: github.ref == 'refs/heads/migrations'
-        run: |
-          docker build -t deligianp/uni:${{ env.DATE }}-synced-migrations .
-          docker push deligianp/uni:${{ env.DATE }}-synced-migrations
+        id: meta_main
+        uses: docker/metadata-action@v5
+        with:
+          images: my-django-app
+          tags: |
+            edge
+            ${{ env.DATE }}
+      - name: Extract metadata for release branch
+        if: github.ref == 'refs/heads/release'
+        id: meta_release
+        uses: docker/metadata-action@v5
+        with:
+          images: my-django-app
+          tags: |
+            ${{ env.DATE }}-synced-migrations
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: ${{ steps.meta_main.outputs.tags }}
+          push: true

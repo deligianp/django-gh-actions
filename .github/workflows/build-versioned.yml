@@ -11,30 +11,67 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Ensure tag is in a proper branch
+        run: |
+          TAG_COMMIT_SHA=$(git rev-list -n 1 $GITHUB_REF)
+          echo "::debug::Tagged commit SHA: $TAG_COMMIT_SHA"
+          
+          TAGGED_BRANCHES=$(git branch -r --contains $TAG_COMMIT_SHA --no-color --format='%(refname:short)')
+          echo "::debug::Branches tagged with the triggering tag: $TAGGED_BRANCHES"
+          ACCEPTABLE_BRANCHES=(main release)
+          BRANCH_MATCH=false
+          for b in ${ACCEPTABLE_BRANCHES[@]}; do
+            if [[ $BRANCH_MATCH == true ]]; then
+              break;
+            fi
+            echo "::debug::Evaluating whether tag is in branch '$b'"
+            for t in ${TAGGED_BRANCHES[@]}; do
+              if [[ $t == *"$b" ]]; then
+                BRANCH_MATCH=true
+                echo "Triggering tag in branch $b is accepted for being used in a Docker image"
+                echo "MATCHED_BRANCH=$b" >> $GITHUB_ENV
+                echo "REFERENCED_COMMIT_SHA=$TAG_COMMIT_SHA" >> $GITHUB_ENV
+                break
+              fi
+            done
+          done
+      - name: Switching to release branch
+        if: env.MATCHED_BRANCH == 'release'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REFERENCED_COMMIT_SHA }}
+          fetch-depth: 0
+          fetch-tags: true
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Get tag name
-        id: get_tag
-        run: echo "TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
+      - name: Extract metadata for tagged commit
+        id: meta_tag
+        uses: docker/metadata-action@v5
+        with:
+          images: my-django-app
+          tags: |
+            type=semver,pattern={{version}}
       - name: Build and push Docker images for main
-        if: github.ref_type == 'tag' && github.event.ref_type == 'branch' && startsWith(github.ref, 'refs/tags/') && github.ref == 'refs/heads/main'
-        run: |
-          docker build -t deligianp/uni:latest .
-          docker build -t deligianp/uni:${{ env.TAG }} .
-          docker push deligianp/uni:latest
-          docker push deligianp/uni:${{ env.TAG }}
-
-      - name: Build and push Docker image for migrations
-        if: github.ref_type == 'tag' && github.event.ref_type == 'branch' && startsWith(github.ref, 'refs/tags/') && github.ref == 'refs/heads/migrations'
-        run: |
-          docker build -t deligianp/uni:${{ env.TAG }} .
-          docker push deligianp/uni:${{ env.TAG }}
+        if: env.MATCHED_BRANCH == 'main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: |
+            latest
+            ${{ steps.meta_tag.outputs.tags }}
+          push: true
+      - name: Build and push Docker images for release
+        if: env.MATCHED_BRANCH == 'release'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: ${{ steps.meta_tag.outputs.tags }}
+          push: true
