@@ -65,7 +65,7 @@ jobs:
         with:
           context: .
           tags: |
-            ***/uni:latest
+            latest
             ${{ steps.meta_tag.outputs.tags }}
           push: true
       - name: Build and push Docker images for release
