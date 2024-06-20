@@ -59,13 +59,13 @@ jobs:
           images: deligianp/uni
           tags: |
             type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Build and push Docker images for main
         if: env.MATCHED_BRANCH == 'main'
         uses: docker/build-push-action@v6
         with:
           context: .
           tags: |
-            latest
             ${{ steps.meta_tag.outputs.tags }}
           push: true
       - name: Build and push Docker images for release
