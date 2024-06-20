@@ -56,7 +56,7 @@ jobs:
         id: meta_tag
         uses: docker/metadata-action@v5
         with:
-          images: my-django-app
+          images: deligianp/uni
           tags: |
             type=semver,pattern={{version}}
       - name: Build and push Docker images for main

@@ -28,7 +28,7 @@ jobs:
         id: meta_main
         uses: docker/metadata-action@v5
         with:
-          images: my-django-app
+          images: deligianp/uni
           tags: |
             edge
             ${{ env.DATE }}
@@ -37,7 +37,7 @@ jobs:
         id: meta_release
         uses: docker/metadata-action@v5
         with:
-          images: my-django-app
+          images: deligianp/uni
           tags: |
             ${{ env.DATE }}-synced-migrations
       - name: Build and push Docker images
