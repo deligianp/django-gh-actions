@@ -40,9 +40,17 @@ jobs:
           images: deligianp/uni
           tags: |
             ${{ env.DATE }}-synced-migrations
-      - name: Build and push Docker images
+      - name: Build and push Docker images for main
+        if: github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
           context: .
           tags: ${{ steps.meta_main.outputs.tags }}
+          push: true
+      - name: Build and push Docker images for release
+        if: github.ref == 'refs/heads/release'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: ${{ steps.meta_release.outputs.tags }}
           push: true
