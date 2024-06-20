@@ -52,26 +52,35 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Extract metadata for tagged commit
-        id: meta_tag
+      - name: Extract metadata for tagged commit in main
+        if: env.MATCHED_BRANCH == 'main'
+        id: meta_tag_main
         uses: docker/metadata-action@v5
         with:
           images: deligianp/uni
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest,enable=true
+      - name: Extract metadata for tagged commit in release
+        if: env.MATCHED_BRANCH == 'release'
+        id: meta_tag_release
+        uses: docker/metadata-action@v5
+        with:
+          images: deligianp/uni
+          tags: |
+            type=semver,pattern={{version}}
       - name: Build and push Docker images for main
         if: env.MATCHED_BRANCH == 'main'
         uses: docker/build-push-action@v6
         with:
           context: .
           tags: |
-            ${{ steps.meta_tag.outputs.tags }}
+            ${{ steps.meta_tag_main.outputs.tags }}
           push: true
       - name: Build and push Docker images for release
         if: env.MATCHED_BRANCH == 'release'
         uses: docker/build-push-action@v6
         with:
           context: .
-          tags: ${{ steps.meta_tag.outputs.tags }}
+          tags: ${{ steps.meta_tag_release.outputs.tags }}
           push: true
